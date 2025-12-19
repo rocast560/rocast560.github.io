@@ -1,6 +1,7 @@
 # My Blog
 
-Yup
+### Command to launch website locally when testing
+bundle exec jekyll s
 
 ## License
 
