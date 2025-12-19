@@ -4,7 +4,4 @@ icon: fas fa-info-circle
 order: 4
 ---
 
-Hello idk I rock climb sometimes
-
-<!-- > Add Markdown syntax content to file `_tabs/about.md`{: .filepath } and it will show up on this page.
-{: .prompt-tip } -->
+Hello this is my blog site where I plan to post about my journey with my cyber defense/hacking comps, software engineering activities and some game hacking stuff, nothing post worthy at the moment but maybe soon. Might even add some clips of me rock climbing or surfing even though this is a technical blog ¯\_(ツ)_/¯.
