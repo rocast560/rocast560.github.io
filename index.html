@@ -3,13 +3,4 @@ layout: home
 # Index page
 ---
 
-<script>
-  (function() {
-    var key = 'has_visited_site';
-    if (!localStorage.getItem(key)) {
-      localStorage.setItem(key, 'true');
-      window.location.href = "{{ '/about/' | relative_url }}";
-    }
-  })();
-</script>
 
