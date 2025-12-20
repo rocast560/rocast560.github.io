@@ -1,19 +1,15 @@
 ---
-# Redirect to about page
-permalink: /
+layout: home
+# Index page
 ---
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url={{ '/about/' | relative_url }}">
-    <title>Redirecting...</title>
-    <script>
-        window.location.href = "{{ '/about/' | relative_url }}";
-    </script>
-</head>
-<body>
-    <p>If you are not redirected automatically, follow this <a href="{{ '/about/' | relative_url }}">link</a>.</p>
-</body>
-</html>
+
+<script>
+  (function() {
+    var key = 'has_visited_site';
+    if (!localStorage.getItem(key)) {
+      localStorage.setItem(key, 'true');
+      window.location.href = "{{ '/about/' | relative_url }}";
+    }
+  })();
+</script>
 
