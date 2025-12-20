@@ -1,6 +1,19 @@
 ---
-layout: home
-# Index page
+# Redirect to about page
+permalink: /
 ---
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="0; url={{ '/about/' | relative_url }}">
+    <title>Redirecting...</title>
+    <script>
+        window.location.href = "{{ '/about/' | relative_url }}";
+    </script>
+</head>
+<body>
+    <p>If you are not redirected automatically, follow this <a href="{{ '/about/' | relative_url }}">link</a>.</p>
+</body>
+</html>
 
