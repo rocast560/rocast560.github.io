@@ -1,5 +1,7 @@
 # My Blog
 
+https://rocast560.github.io
+
 ### Command to launch website locally when testing
 bundle exec jekyll s
 
