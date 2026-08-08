@@ -1,0 +1,386 @@
+---
+layout: page
+# A single searchable directory of every category and tag.
+---
+
+{% include lang.html %}
+
+{% comment %}
+  Build one flat list of "<name>::<kind>::<parent>" strings so categories and
+  tags can be sorted and rendered together instead of on two separate pages.
+{% endcomment %}
+
+{% assign items = '' | split: '' %}
+
+{% for category in site.categories %}
+  {% assign category_name = category | first %}
+  {% assign first_post = category | last | first %}
+  {% assign parent = '' %}
+  {% unless category_name == first_post.categories[0] %}
+    {% assign parent = first_post.categories[0] %}
+  {% endunless %}
+  {% capture item %}{{ category_name }}::category::{{ parent }}{% endcapture %}
+  {% assign items = items | push: item %}
+{% endfor %}
+
+{% for tag in site.tags %}
+  {% capture item %}{{ tag | first }}::tag::{% endcapture %}
+  {% assign items = items | push: item %}
+{% endfor %}
+
+{% assign items = items | sort_natural %}
+
+<div id="directory">
+  <p class="dir-intro text-muted">
+    Every category and tag in one place: {{ site.categories | size }} categories and
+    {{ site.tags | size }} tags across {{ site.posts | size }} posts. Search by topic or by post
+    title, then open an entry to see what's filed under it.
+  </p>
+
+  <div class="dir-controls">
+    <div class="dir-search">
+      <i class="fas fa-magnifying-glass"></i>
+      <input
+        type="search"
+        id="dir-search-input"
+        placeholder="Search categories, tags and post titles…"
+        aria-label="Search the directory"
+        autocomplete="off"
+      >
+    </div>
+
+    <div class="dir-filters" role="group" aria-label="Filter by kind">
+      <button type="button" class="dir-filter active" data-filter="all">All</button>
+      <button type="button" class="dir-filter" data-filter="category">
+        <i class="far fa-folder fa-fw"></i>Categories
+      </button>
+      <button type="button" class="dir-filter" data-filter="tag">
+        <i class="fas fa-hashtag fa-fw"></i>Tags
+      </button>
+    </div>
+  </div>
+
+  <p id="dir-empty" class="dir-empty text-muted" hidden>Nothing in the directory matches that.</p>
+
+  <ul class="dir-list list-unstyled">
+    {% for item in items %}
+      {% assign parts = item | split: '::' %}
+      {% assign name = parts[0] %}
+      {% assign kind = parts[1] %}
+      {% assign parent = parts[2] %}
+
+      {% if kind == 'category' %}
+        {% assign posts = site.categories[name] %}
+        {% capture entry_url %}/categories/{{ name | slugify | url_encode }}/{% endcapture %}
+      {% else %}
+        {% assign posts = site.tags[name] %}
+        {% capture entry_url %}/tags/{{ name | slugify | url_encode }}/{% endcapture %}
+      {% endif %}
+
+      {% capture haystack %}{{ name }} {{ parent }} {{ kind }} {% for post in posts %}{{ post.title }} {% endfor %}{% endcapture %}
+
+      <li class="dir-entry" data-kind="{{ kind }}" data-search="{{ haystack | downcase | escape }}">
+        <div class="dir-entry-head">
+          <button
+            type="button"
+            class="dir-toggle"
+            aria-expanded="false"
+            aria-label="Show posts in {{ name }}"
+          >
+            <i class="fas fa-chevron-right fa-fw"></i>
+          </button>
+
+          <span class="dir-icon">
+            {% if kind == 'category' %}
+              <i class="far fa-folder fa-fw"></i>
+            {% else %}
+              <i class="fas fa-hashtag fa-fw"></i>
+            {% endif %}
+          </span>
+
+          <a class="dir-name" href="{{ entry_url | relative_url }}">
+            {%- if parent and parent != '' -%}
+              <span class="dir-parent">{{ parent }}<i class="fas fa-angle-right fa-fw"></i></span>
+            {%- endif -%}
+            {{ name }}
+          </a>
+
+          <span class="dir-kind dir-kind-{{ kind }}">{{ kind }}</span>
+
+          <span class="dir-count">
+            {{ posts | size }}
+            {% if posts.size == 1 %}post{% else %}posts{% endif %}
+          </span>
+        </div>
+
+        <ul class="dir-posts list-unstyled">
+          {% for post in posts %}
+            <li>
+              <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+              <span class="dash flex-grow-1"></span>
+              <time class="dir-post-date">{{ post.date | date: '%b %d, %Y' }}</time>
+            </li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<style>
+  #directory .dir-intro {
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+  }
+
+  #directory .dir-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  #directory .dir-search {
+    position: relative;
+    flex: 1 1 16rem;
+  }
+
+  #directory .dir-search i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--search-icon-color);
+    font-size: 0.85rem;
+  }
+
+  #directory .dir-search input {
+    width: 100%;
+    padding: 0.45rem 0.75rem 0.45rem 2.1rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    background: var(--main-bg);
+    border: 1px solid var(--search-border-color);
+    border-radius: 1.2rem;
+    outline: none;
+  }
+
+  #directory .dir-search input:focus {
+    border-color: var(--input-focus-border-color);
+  }
+
+  #directory .dir-search input::-webkit-search-cancel-button {
+    cursor: pointer;
+  }
+
+  #directory .dir-filters {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  #directory .dir-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+    color: var(--text-muted-color);
+    background: transparent;
+    border: 1px solid var(--btn-border-color);
+    border-radius: 1.2rem;
+    cursor: pointer;
+  }
+
+  #directory .dir-filter:hover {
+    background-color: var(--sidebar-hover-bg);
+  }
+
+  #directory .dir-filter.active {
+    color: var(--btn-box-shadow, var(--text-color));
+    border-color: var(--input-focus-border-color);
+    background-color: var(--sidebar-hover-bg);
+    font-weight: 600;
+  }
+
+  #directory .dir-empty {
+    padding: 1.5rem 0;
+    font-size: 0.9rem;
+  }
+
+  #directory .dir-list {
+    margin: 0;
+    border-top: 1px solid var(--main-border-color);
+  }
+
+  #directory .dir-entry {
+    border-bottom: 1px solid var(--main-border-color);
+  }
+
+  #directory .dir-entry[hidden] {
+    display: none;
+  }
+
+  #directory .dir-entry-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.3rem;
+  }
+
+  #directory .dir-toggle {
+    flex: none;
+    padding: 0.15rem;
+    color: var(--text-muted-color);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-size: 0.7rem;
+  }
+
+  #directory .dir-toggle i {
+    transition: transform 200ms ease;
+  }
+
+  #directory .dir-entry.is-open .dir-toggle i {
+    transform: rotate(90deg);
+  }
+
+  #directory .dir-icon {
+    flex: none;
+    color: var(--text-muted-color);
+    font-size: 0.85rem;
+  }
+
+  #directory .dir-name {
+    font-size: 0.95rem;
+    color: var(--text-color);
+  }
+
+  #directory .dir-name:hover {
+    color: var(--link-color);
+    border-bottom: none;
+  }
+
+  #directory .dir-parent {
+    color: var(--text-muted-color);
+    font-size: 0.85rem;
+  }
+
+  #directory .dir-parent i {
+    font-size: 0.7rem;
+    width: 0.9rem;
+  }
+
+  #directory .dir-kind {
+    flex: none;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.6em;
+    border: 1px solid var(--btn-border-color);
+    color: var(--text-muted-color);
+  }
+
+  #directory .dir-count {
+    margin-left: auto;
+    flex: none;
+    font-size: 0.75rem;
+    color: var(--text-muted-color);
+    white-space: nowrap;
+  }
+
+  #directory .dir-posts {
+    display: none;
+    margin: 0;
+    padding: 0 0.3rem 0.7rem 2.35rem;
+  }
+
+  #directory .dir-entry.is-open .dir-posts {
+    display: block;
+  }
+
+  #directory .dir-posts li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.2rem 0;
+    font-size: 0.88rem;
+  }
+
+  #directory .dir-post-date {
+    flex: none;
+    font-size: 0.75rem;
+    color: var(--text-muted-color);
+    white-space: nowrap;
+  }
+
+  @media all and (max-width: 576px) {
+    #directory .dir-kind {
+      display: none;
+    }
+
+    #directory .dir-posts li .dash {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var root = document.getElementById('directory');
+    if (!root) return;
+
+    var input = document.getElementById('dir-search-input');
+    var empty = document.getElementById('dir-empty');
+    var entries = Array.prototype.slice.call(root.querySelectorAll('.dir-entry'));
+    var filters = Array.prototype.slice.call(root.querySelectorAll('.dir-filter'));
+    var kind = 'all';
+
+    function apply() {
+      var query = input.value.trim().toLowerCase();
+      var visible = 0;
+
+      entries.forEach(function (entry) {
+        var kindOk = kind === 'all' || entry.dataset.kind === kind;
+        var textOk = query === '' || entry.dataset.search.indexOf(query) !== -1;
+        var show = kindOk && textOk;
+
+        entry.hidden = !show;
+        if (show) visible++;
+
+        // While searching, open matches so it's clear which posts matched.
+        if (show && query !== '') {
+          entry.classList.add('is-open');
+          entry.querySelector('.dir-toggle').setAttribute('aria-expanded', 'true');
+        } else if (query === '') {
+          entry.classList.remove('is-open');
+          entry.querySelector('.dir-toggle').setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      empty.hidden = visible !== 0;
+    }
+
+    entries.forEach(function (entry) {
+      entry.querySelector('.dir-toggle').addEventListener('click', function () {
+        var open = entry.classList.toggle('is-open');
+        this.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    });
+
+    filters.forEach(function (button) {
+      button.addEventListener('click', function () {
+        filters.forEach(function (other) {
+          other.classList.toggle('active', other === button);
+        });
+        kind = button.dataset.filter;
+        apply();
+      });
+    });
+
+    input.addEventListener('input', apply);
+  })();
+</script>

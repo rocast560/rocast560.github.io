@@ -152,6 +152,14 @@ paginate: 10
 # The base URL of your site
 baseurl: ''
 
+# Example / demo posts (see README.md and _posts/examples/)
+# ----------------------------------------------------------
+# Demo posts live in `_posts/examples/`. This flag controls whether they show up.
+#   (leave commented) -> shown during local `jekyll serve`, hidden in production
+#   show_examples: true   -> always show them
+#   show_examples: false  -> always hide them
+show_examples: true
+
 # ------------ The following options are not recommended to be modified ------------------
 
 kramdown:
