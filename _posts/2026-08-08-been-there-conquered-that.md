@@ -1,26 +1,28 @@
 ---
-title: "We ran a whole engagement out of one Google Doc"
+title: "A interactive note taking tool collegiate pentesting comps"
 date: 2026-08-08 00:00:00 -0400
 categories: [Projects, Security Tooling]
 tags: [pentest, cptc, reporting, crdt, typst, react, claude, mcp]
 description: "Been There, Conquered That: a real-time notes and reporting workspace for a collegiate pentest competition."
-media_subpath: /assets/img/posts/btct
 ---
 
 *Been There, Conquered That: a real-time notes and reporting workspace for a
 collegiate pentest competition.*
 
-{% include embed/video.html src='btct-demo.mp4' loop=true muted=true title='Full-quality 1920x1080 clip, one take against a small demo workspace called Fake Company.' %}
+<video class="embed-video file" controls muted loop width="960" style="max-width:100%;height:auto">
+  <source src="/assets/img/posts/btct/btct-demo.mp4" type="video/mp4">
+  Your browser does not support the video tag. Here is a
+  <a href="/assets/img/posts/btct/btct-demo.mp4">link to the video file</a> instead.
+</video>
+
+*Full-quality 1920x1080 clip, one take against a small demo workspace called Fake Company.*
 
 ## Why
 
 All of it went in one Google Doc. Five of us, same document, all day.
 
 To be fair, that mostly works. Docs handles five cursors without complaining and
-nothing gets lost. But a few hours in it's a wall of headings somebody else made,
-and you're scrolling past two people's scratch notes to find the host you were
-on. Somebody asks whether anyone already looked at the file server and the honest
-answer is to go read the whole thing.
+nothing gets lost. But a few hours things get a little messey and there is alot of back and fourth of where is stuff located and when writing asking the question of who did this and where did you write it down.
 
 What actually bothered me is that none of us take notes like that anywhere else.
 We all use Notion or Obsidian for our own stuff, with linked pages, tags, a
@@ -52,11 +54,11 @@ Pages are a nestable tree with titles, slugs, tags, and icons. The body is a
 live-preview markdown editor, so you type markdown and it renders as you go.
 There's no source pane and preview pane to keep in sync.
 
-![The page editor with an engagement notes document](pages-editor.png)
+![The page editor with an engagement notes document](/assets/img/posts/btct/pages-editor.png)
 
 Type `/` to get a block menu: headings, lists, quotes, tables, code, images.
 
-![The slash menu open in the editor](slash-menu.png)
+![The slash menu open in the editor](/assets/img/posts/btct/slash-menu.png)
 
 Input rules fire as you type too. Open a fence with ` ```bash ` and the paragraph
 becomes a real CodeMirror block with line numbers and live highlighting. That's
@@ -76,7 +78,7 @@ holds CVSS and vector, likelihood, impact, exploit steps, MITRE mapping, and
 remediation, not just a title. Edges are typed too, with `AdminTo`, `HasSession`,
 `MemberOf`, `Exploits` and `PivotsTo`.
 
-![The attack narrative graph for an internal network engagement](attack-graph.png)
+![The attack narrative graph for an internal network engagement](/assets/img/posts/btct/attack-graph.png)
 
 Every node carries structured data, and you can see it in the clip: opening the
 Critical finding brings up an editor with severity, CVSS and vector, likelihood
@@ -99,14 +101,14 @@ The findings list isn't a list you maintain. It's a view over every Finding node
 in every narrative, grouped by severity and sorted by CVSS. You maintain the
 graph and this falls out of it.
 
-![The findings collector grouped by severity](findings.png)
+![The findings collector grouped by severity](/assets/img/posts/btct/findings.png)
 
 The timeline is the same trick applied to time. Every node in the workspace
 ordered by when it was discovered, grouped by day, with each node's incoming
 edges shown underneath as lineage. One button copies the lot as a markdown
 outline, and that outline is a first draft of your narrative section.
 
-![The attack timeline, grouped by day with edge lineage](timeline.png)
+![The attack timeline, grouped by day with edge lineage](/assets/img/posts/btct/timeline.png)
 
 ## nmap import
 
@@ -116,7 +118,7 @@ than duplicating. Then bind a scanned host to its Host node on the graph, and th
 open ports sync across the link. In the clip I import the scan, then connect
 fc-sql01 to the FC-SQL01 node and jump straight to it on the canvas.
 
-![A parsed nmap host with its open ports and service versions](nmap-host.png)
+![A parsed nmap host with its open ports and service versions](/assets/img/posts/btct/nmap-host.png)
 
 The clip imports
 [`fake-company.xml`](/assets/img/posts/btct/fake-company.xml), which you can
@@ -136,7 +138,7 @@ commands as they're typed and ships them with the operator name, hostname,
 working directory, start time, exit code, and duration. A long scan shows up the
 moment it starts and fills in its result when it finishes.
 
-![The command log showing captured commands from three operators](command-log.png)
+![The command log showing captured commands from three operators](/assets/img/posts/btct/command-log.png)
 
 Secrets get redacted before they leave the operator's box. Passwords, hashes,
 auth headers and URL credentials become `«REDACTED»`, and the redaction is
@@ -157,7 +159,7 @@ Only whitelisted tools are logged. Everything else you type never leaves the box
 There's a Typst tab: source on the left, the rendered document in the middle,
 assets on the right.
 
-![The Typst editor with a live-rendered report preview](typst-report.png)
+![The Typst editor with a live-rendered report preview](/assets/img/posts/btct/typst-report.png)
 
 The compiler and the renderer are WebAssembly, bundled into the app, with the
 default font set embedded. It renders with no network at all. That was the whole
@@ -177,7 +179,7 @@ the matching source line.
 Drag any tab to a pane edge. Pages, graphs, findings, the timeline, the Typst
 editor, the assistant, all of them.
 
-![The graph and a notes page side by side in split panes](split-panes.png)
+![The graph and a notes page side by side in split panes](/assets/img/posts/btct/split-panes.png)
 
 Attack path on the left, write-up on the right, which is how I actually used it.
 
@@ -203,14 +205,14 @@ VLAN.
 `Ctrl/⌘+K` for everything. Create a page or a narrative, open the Typst document,
 jump to any page or graph by name, ask Claude, flip dark mode.
 
-![The command palette](command-palette.png)
+![The command palette](/assets/img/posts/btct/command-palette.png)
 
 ## Claude, in both directions
 
 An admin sets an Anthropic API key in the admin panel. The key is stored
 server-side and never reaches the browser or the JS bundle.
 
-![Admin panel showing the Claude AI, MCP server, and command log settings](admin-ai-mcp.png)
+![Admin panel showing the Claude AI, MCP server, and command log settings](/assets/img/posts/btct/admin-ai-mcp.png)
 
 The built-in assistant is a tab like any other. It reads the live workspace,
 pages, graphs, findings, nmap results, and in edit mode it can write back:
