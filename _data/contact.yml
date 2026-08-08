@@ -7,11 +7,6 @@
   icon: "fab fa-linkedin"
   url: "https://www.linkedin.com/in/robertocastro3/"
 
-- type: stack-overflow
-  icon: 'fab fa-stack-overflow'
-  url:  'https://stackoverflow.com/users/19119415/rocast'               
-
-  
 - type: twitter
   icon: "fa-brands fa-x-twitter"
 # - type: rss
