@@ -1,41 +1,50 @@
 ---
-title: "I got tired of writing pentest notes in Word"
+title: "We ran a whole engagement out of one Google Doc"
 date: 2026-08-08 00:00:00 -0400
 categories: [Projects, Security Tooling]
 tags: [pentest, cptc, reporting, crdt, typst, react, claude, mcp]
 description: "Been There, Conquered That: a real-time notes and reporting workspace for a collegiate pentest competition."
+media_subpath: /assets/img/posts/btct
 ---
 
 *Been There, Conquered That: a real-time notes and reporting workspace for a
 collegiate pentest competition.*
 
-![BTCT: typing a highlighted code block, command palette, graph auto-layout, nmap XML import, findings, live command log, split panes and the Typst report](/assets/img/posts/btct/btct-demo.gif)
+{% include embed/video.html src='btct-demo.mp4' loop=true muted=true title='Full-quality 1920x1080 clip, one take against a small demo workspace called Fake Company.' %}
 
 ## Why
 
-Five of us, five Word documents, no merge.
+All of it went in one Google Doc. Five of us, same document, all day.
 
-That was the actual setup. Somebody would ask "did anyone already look at the
-file server" and the honest answer was that you'd have to go ask all four other
-people, because the only record was in a `.docx` on their laptop. At the end of
-the engagement we'd stitch it all together into one report under time pressure,
-which is exactly when you discover that two operators wrote up the same finding
-with different CVSS scores.
+To be fair, that mostly works. Docs handles five cursors without complaining and
+nothing gets lost. But a few hours in it's a wall of headings somebody else made,
+and you're scrolling past two people's scratch notes to find the host you were
+on. Somebody asks whether anyone already looked at the file server and the honest
+answer is to go read the whole thing.
 
-We also ran
+What actually bothered me is that none of us take notes like that anywhere else.
+We all use Notion or Obsidian for our own stuff, with linked pages, tags, a
+sidebar you can navigate, code blocks that look like code. Then we'd sit down for
+the one weekend of the year that matters and drop straight back to using google docs because that's what we have to use.
+
+We did have one purpose-built tool. We ran
 [SLORPIN](https://github.com/nationalcptc-teamtools/Cal-Poly-Pomona/tree/master/SLORPIN),
 Cal Poly Pomona's nmap aggregator, which stands for Some Lone Operator Remakes
 Program Intended for Nmap. It's a Go and Gin web app that pulls everyone's scan
-results into one database behind a login, organized into named operations, so
-you can at least review the team's recon in one place instead of five. That part
-was genuinely useful and it's the reason this project exists at all. But it only
-covers recon, it doesn't sync in real time, and it wasn't something you wanted to
-stare at on hour thirty of a competition.
+results into one database behind a login, organized into named operations, so you
+can review the team's recon in one place instead of on five separate boxes. That
+part was genuinely useful and it's the reason this project exists at all. But it
+only covers recon, it doesn't sync in real time, and it wasn't something you
+wanted to stare at on hour thirty of a competition.
 
-So I built the thing I wanted. Recon aggregation like SLORPIN had, plus the
-note-taking, the attack narrative, the evidence trail, and the report. All of it
-in one place, all of it live, none of it leaving the LAN. One container, one
-port, one volume on the engagement network.
+So why not just build the rest of it? Google Docs is fine. It just isn't built
+for this, and there's no rule saying the workflow you use for the
+highest-pressure three days of the year has to be the one you're using for class assignments.
+
+BTCT is that build. Recon aggregation like SLORPIN had, plus the note-taking, the
+attack narrative, the evidence trail, and the report. All of it in one place, all
+of it live, none of it leaving the LAN. One container, one port, one volume on
+the engagement network.
 
 ## Notes
 
@@ -43,11 +52,11 @@ Pages are a nestable tree with titles, slugs, tags, and icons. The body is a
 live-preview markdown editor, so you type markdown and it renders as you go.
 There's no source pane and preview pane to keep in sync.
 
-![The page editor with an engagement notes document](/assets/img/posts/btct/pages-editor.png)
+![The page editor with an engagement notes document](pages-editor.png)
 
 Type `/` to get a block menu: headings, lists, quotes, tables, code, images.
 
-![The slash menu open in the editor](/assets/img/posts/btct/slash-menu.png)
+![The slash menu open in the editor](slash-menu.png)
 
 Input rules fire as you type too. Open a fence with ` ```bash ` and the paragraph
 becomes a real CodeMirror block with line numbers and live highlighting. That's
@@ -67,17 +76,22 @@ holds CVSS and vector, likelihood, impact, exploit steps, MITRE mapping, and
 remediation, not just a title. Edges are typed too, with `AdminTo`, `HasSession`,
 `MemberOf`, `Exploits` and `PivotsTo`.
 
-![The attack narrative graph for an internal network engagement](/assets/img/posts/btct/attack-graph.png)
+![The attack narrative graph for an internal network engagement](attack-graph.png)
 
-Double-click a node and you land on its write-up page. Select two nodes and
-Highlight Path runs a BFS between them and lights up the route in gold. `Ctrl+F`
-fuzzy-searches every field on every node, which matters more than it sounds like
-once a narrative has forty of them.
+Every node carries structured data, and you can see it in the clip: opening the
+Critical finding brings up an editor with severity, CVSS and vector, likelihood
+and impact, exploit steps, the MITRE technique, and remediation. It's a form, not
+a paragraph you have to remember to fill in the same way twice.
+
+Right-click one node as the path start and another as the end, and Highlight Path
+runs a BFS between them and lights the route gold. In the clip that traces
+FC-WEB01 to FC-DC01, three hops through the SQL box and the service account.
+`Ctrl+F` fuzzy-searches every field on every node, which matters more than it
+sounds once a narrative has a few dozen of them.
 
 Auto Layout re-flows the whole canvas into a dagre hierarchy in one click. You
-can watch it in the clip. Honestly it zooms out further than you want and you
-have to scroll back in, but it beats dragging thirty-seven nodes into place by
-hand.
+can watch it snap into a top-down tree, which beats dragging a dozen nodes into
+place by hand.
 
 ## Findings and the timeline build themselves
 
@@ -85,23 +99,32 @@ The findings list isn't a list you maintain. It's a view over every Finding node
 in every narrative, grouped by severity and sorted by CVSS. You maintain the
 graph and this falls out of it.
 
-![The findings collector grouped by severity](/assets/img/posts/btct/findings.png)
+![The findings collector grouped by severity](findings.png)
 
 The timeline is the same trick applied to time. Every node in the workspace
 ordered by when it was discovered, grouped by day, with each node's incoming
 edges shown underneath as lineage. One button copies the lot as a markdown
 outline, and that outline is a first draft of your narrative section.
 
-![The attack timeline, grouped by day with edge lineage](/assets/img/posts/btct/timeline.png)
+![The attack timeline, grouped by day with edge lineage](timeline.png)
 
 ## nmap import
 
 Drop nmap XML into a scan group. It pulls hosts, OS detection, ports, service
 versions, and NSE script output. Re-import the same IP and the ports merge rather
-than duplicating. Hosts can be bound to Host nodes on the graph, and open ports
-sync across the link.
+than duplicating. Then bind a scanned host to its Host node on the graph, and the
+open ports sync across the link. In the clip I import the scan, then connect
+fc-sql01 to the FC-SQL01 node and jump straight to it on the canvas.
 
-![A parsed nmap host with 30 open ports and service versions](/assets/img/posts/btct/nmap-host.png)
+![A parsed nmap host with its open ports and service versions](nmap-host.png)
+
+The clip imports
+[`fake-company.xml`](/assets/img/posts/btct/fake-company.xml), which you can
+download if you want to reproduce that bit. It's an `nmap -sS -sV -sC -O` run over
+the demo network: 5 hosts up, 1 deliberately down so you can see the parser skip
+it, 18 ports, 13 NSE script results. Hostnames come from the PTR records and the
+OS badge comes from `<osmatch>`, so fc-web01 lands as Linux and everything else
+comes through as Windows.
 
 ## The command log writes your evidence trail
 
@@ -113,18 +136,19 @@ commands as they're typed and ships them with the operator name, hostname,
 working directory, start time, exit code, and duration. A long scan shows up the
 moment it starts and fills in its result when it finishes.
 
-![The command log showing captured commands from three operators](/assets/img/posts/btct/command-log.png)
+![The command log showing captured commands from three operators](command-log.png)
 
 Secrets get redacted before they leave the operator's box. Passwords, hashes,
 auth headers and URL credentials become `«REDACTED»`, and the redaction is
 tool-aware, so `nmap -p 1-65535` keeps its ports while `mysql -pSECRET` gets
 scrubbed. The unredacted line stays in a local log on that machine.
 
-New commands push in live. No reload, no polling. In the clip the counter goes
-from 14 to 19 while you watch, as three operators' boxes ship `feroxbuster`,
-`certipy`, `nxc`, `ntlmrelayx` and `sqlmap`, and the tool filter chips grow to
-match. Filter by operator, tool, host, status or free text, then export whatever
-you've filtered to as CSV or JSON for the report appendix.
+New commands push in live. No reload, no polling. In the clip the log fills in
+front of you as three operators' boxes ship `evil-winrm`, `nxc`,
+`impacket-secretsdump` and `sqlmap`, two of them showing `«REDACTED»`, and the
+tool filter chips grow to match. Filter by operator, tool, host, status or free
+text, then export whatever you've filtered to as CSV or JSON for the report
+appendix.
 
 Only whitelisted tools are logged. Everything else you type never leaves the box.
 
@@ -133,7 +157,7 @@ Only whitelisted tools are logged. Everything else you type never leaves the box
 There's a Typst tab: source on the left, the rendered document in the middle,
 assets on the right.
 
-![The Typst editor with a live-rendered report preview](/assets/img/posts/btct/typst-report.png)
+![The Typst editor with a live-rendered report preview](typst-report.png)
 
 The compiler and the renderer are WebAssembly, bundled into the app, with the
 default font set embedded. It renders with no network at all. That was the whole
@@ -153,7 +177,7 @@ the matching source line.
 Drag any tab to a pane edge. Pages, graphs, findings, the timeline, the Typst
 editor, the assistant, all of them.
 
-![The graph and a notes page side by side in split panes](/assets/img/posts/btct/split-panes.png)
+![The graph and a notes page side by side in split panes](split-panes.png)
 
 Attack path on the left, write-up on the right, which is how I actually used it.
 
@@ -179,14 +203,14 @@ VLAN.
 `Ctrl/⌘+K` for everything. Create a page or a narrative, open the Typst document,
 jump to any page or graph by name, ask Claude, flip dark mode.
 
-![The command palette](/assets/img/posts/btct/command-palette.png)
+![The command palette](command-palette.png)
 
 ## Claude, in both directions
 
 An admin sets an Anthropic API key in the admin panel. The key is stored
 server-side and never reaches the browser or the JS bundle.
 
-![Admin panel showing the Claude AI, MCP server, and command log settings](/assets/img/posts/btct/admin-ai-mcp.png)
+![Admin panel showing the Claude AI, MCP server, and command log settings](admin-ai-mcp.png)
 
 The built-in assistant is a tab like any other. It reads the live workspace,
 pages, graphs, findings, nmap results, and in edit mode it can write back:
@@ -217,9 +241,4 @@ does auth, static hosting and a Yjs relay. It knows nothing about pages or graph
 or findings, and there are only three places where that's not true: the AI
 assistant, the asset store, and the command log ingest. Keeping it that way is
 the reason the client can work offline at all.
-
-```bash
-docker compose up -d --build   # needs AUTH_SECRET in .env
-curl localhost:8080/healthz
-```
 
