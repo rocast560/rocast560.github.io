@@ -158,7 +158,7 @@ baseurl: ''
 #   (leave commented) -> shown during local `jekyll serve`, hidden in production
 #   show_examples: true   -> always show them
 #   show_examples: false  -> always hide them
-show_examples: true
+# show_examples: true
 
 # ------------ The following options are not recommended to be modified ------------------
 
