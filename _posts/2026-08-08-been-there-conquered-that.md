@@ -1,5 +1,5 @@
 ---
-title: "A interactive note taking tool collegiate pentesting comps"
+title: "How about we not take our pentesting notes in Microsoft Word"
 date: 2026-08-08 00:00:00 -0400
 categories: [Projects, Security Tooling]
 tags: [pentest, cptc, reporting, crdt, typst, react, claude, mcp]
@@ -19,15 +19,15 @@ collegiate pentest competition.*
 
 ## Why
 
-All of it went in one Google Doc. Five of us, same document, all day.
+All of it went in one Word document. Five of us, same document, all day.
 
-To be fair, that mostly works. Docs handles five cursors without complaining and
+To be fair, that mostly works. Word handles five cursors without complaining and
 nothing gets lost. But a few hours things get a little messey and there is alot of back and fourth of where is stuff located and when writing asking the question of who did this and where did you write it down.
 
 What actually bothered me is that none of us take notes like that anywhere else.
 We all use Notion or Obsidian for our own stuff, with linked pages, tags, a
 sidebar you can navigate, code blocks that look like code. Then we'd sit down for
-the one weekend of the year that matters and drop straight back to using google docs because that's what we have to use.
+the one weekend of the year that matters and drop straight back to using Word because that's what we have to use.
 
 We did have one purpose-built tool. We ran
 [SLORPIN](https://github.com/nationalcptc-teamtools/Cal-Poly-Pomona/tree/master/SLORPIN),
@@ -39,7 +39,7 @@ part was genuinely useful and it's the reason this project exists at all. But it
 only covers recon, it doesn't sync in real time, and it wasn't something you
 wanted to stare at on hour thirty of a competition.
 
-So why not just build the rest of it? Google Docs is fine. It just isn't built
+So why not just build the rest of it? Word is fine. It just isn't built
 for this, and there's no rule saying the workflow you use for the
 highest-pressure three days of the year has to be the one you're using for class assignments.
 
