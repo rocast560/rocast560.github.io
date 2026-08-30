@@ -50,197 +50,126 @@ the engagement network.
 
 ## Notes
 
-Pages are a nestable tree with titles, slugs, tags, and icons. The body is a
-live-preview markdown editor, so you type markdown and it renders as you go.
-There's no source pane and preview pane to keep in sync.
+The notes view is where the project starts, because that is where CPTC teams lose the most time. During a competition, someone finds a weak password, someone else is still scanning, and another person is already trying to turn that into a report paragraph. If the notes are buried in one long Word document, people spend too much time asking where something was written down.
+
+BTCT keeps notes as a tree of pages. Each page has a title, slug, tags, and an icon, so the team can split the work by host, service, finding, or report section without making a mess. The editor still feels familiar: type Markdown, use headings and lists, paste commands into code blocks, and keep going.
 
 ![The page editor with an engagement notes document](/assets/img/posts/btct/pages-editor.png)
 
-Type `/` to get a block menu: headings, lists, quotes, tables, code, images.
+Type `/` and the editor opens a small block menu for headings, lists, quotes, tables, code, and images.
 
 ![The slash menu open in the editor](/assets/img/posts/btct/slash-menu.png)
 
-Input rules fire as you type too. Open a fence with ` ```bash ` and the paragraph
-becomes a real CodeMirror block with line numbers and live highlighting. That's
-the first few seconds of the clip. New code blocks default to `shell`, which is
-what you're pasting most of the time anyway.
+Code blocks use CodeMirror, so pasted commands look like commands instead of paragraph text. That sounds small, but it matters when the report team is trying to prove exactly what happened three hours later.
 
-Select text and a format bar appears with the usual bold, italic, strike, inline
-code, block conversions, and a seven-color highlighter. The highlighter marks
-are deliberately session-only. CommonMark has no highlight syntax, so keeping
-them would mean the exported markdown stops being portable.
+## The attack path belongs on a graph
 
-## The attack narrative is a graph, not a paragraph
+A written narrative is useful in the final report. It is not always the best way to think while the attack is still unfolding.
 
-Every engagement gets one or more canvases. Nodes are typed: Host, Credential,
-Service, Finding, Pivot. Each one carries real structured data, so a Finding node
-holds CVSS and vector, likelihood, impact, exploit steps, MITRE mapping, and
-remediation, not just a title. Edges are typed too, with `AdminTo`, `HasSession`,
-`MemberOf`, `Exploits` and `PivotsTo`.
+BTCT gives each workspace one or more attack graphs. A node can be a host, service, credential, pivot, or finding. Each node carries useful data, not decoration. A finding carries the fields the report needs later: severity, CVSS, likelihood, impact, exploit steps, MITRE mapping, evidence, and remediation.
 
 ![The attack narrative graph for an internal network engagement](/assets/img/posts/btct/attack-graph.png)
 
-Every node carries structured data, and you can see it in the clip: opening the
-Critical finding brings up an editor with severity, CVSS and vector, likelihood
-and impact, exploit steps, the MITRE technique, and remediation. It's a form, not
-a paragraph you have to remember to fill in the same way twice.
+For CPTC, this helps the team agree on the story faster. If FC-WEB01 leads to FC-SQL01, which exposes a service account, which leads to a domain controller issue, that path is visible. A teammate can open the graph and understand the chain without reading five pages first.
 
-Right-click one node as the path start and another as the end, and Highlight Path
-runs a BFS between them and lights the route gold. In the clip that traces
-FC-WEB01 to FC-DC01, three hops through the SQL box and the service account.
-`Ctrl+F` fuzzy-searches every field on every node, which matters more than it
-sounds once a narrative has a few dozen of them.
+The graph can also highlight a path between two nodes and lay itself out automatically. That makes it easier to clean up the narrative before reporting, especially when the board starts as a rough map built during exploitation.
 
-Auto Layout re-flows the whole canvas into a dagre hierarchy in one click. You
-can watch it snap into a top-down tree, which beats dragging a dozen nodes into
-place by hand.
+## Findings come from the work
 
-## Findings and the timeline build themselves
-
-The findings list isn't a list you maintain. It's a view over every Finding node
-in every narrative, grouped by severity and sorted by CVSS. You maintain the
-graph and this falls out of it.
+The findings list is generated from finding nodes across the workspace. It is grouped by severity and sorted by CVSS, so the report writer is not maintaining a second spreadsheet while everyone else is still changing the facts.
 
 ![The findings collector grouped by severity](/assets/img/posts/btct/findings.png)
 
-The timeline is the same trick applied to time. Every node in the workspace
-ordered by when it was discovered, grouped by day, with each node's incoming
-edges shown underneath as lineage. One button copies the lot as a markdown
-outline, and that outline is a first draft of your narrative section.
+That is the real advantage: the same finding used in the attack graph can feed the report view. When the team edits the remediation or adds better evidence, the update stays attached to the finding instead of living in a separate document that someone has to reconcile later.
+
+The timeline uses the same idea. It orders the workspace by discovery time and shows incoming edges under each item, so the team can turn a messy day of work into a cleaner narrative.
 
 ![The attack timeline, grouped by day with edge lineage](/assets/img/posts/btct/timeline.png)
 
-## nmap import
+One button copies the timeline as Markdown. It will not write the final report for you, which is a good thing. It gives you a starting outline that already has the order and lineage right.
 
-Drop nmap XML into a scan group. It pulls hosts, OS detection, ports, service
-versions, and NSE script output. Re-import the same IP and the ports merge rather
-than duplicating. Then bind a scanned host to its Host node on the graph, and the
-open ports sync across the link. In the clip I import the scan, then connect
-fc-sql01 to the FC-SQL01 node and jump straight to it on the canvas.
+## Nmap import keeps recon connected
+
+Recon usually starts as files scattered across operator machines. BTCT lets the team drop nmap XML into a scan group, then parses hosts, ports, service versions, OS guesses, and NSE script output.
 
 ![A parsed nmap host with its open ports and service versions](/assets/img/posts/btct/nmap-host.png)
 
-The clip imports
-[`fake-company.xml`](/assets/img/posts/btct/fake-company.xml), which you can
-download if you want to reproduce that bit. It's an `nmap -sS -sV -sC -O` run over
-the demo network: 5 hosts up, 1 deliberately down so you can see the parser skip
-it, 18 ports, 13 NSE script results. Hostnames come from the PTR records and the
-OS badge comes from `<osmatch>`, so fc-web01 lands as Linux and everything else
-comes through as Windows.
+Re-importing the same host merges the ports instead of duplicating the machine. A scanned host can also be linked to a host node on the graph. Once that link exists, the open ports and service names stay close to the attack path and the write-up.
 
-## The command log writes your evidence trail
+The demo uses a small fake environment scan:
+[`fake-environment.xml`](/assets/img/posts/btct/fake-environment.xml). It is an `nmap -sS -sV -sC -O` run over a five-host demo network, with one intentionally down host so the parser has to ignore it.
 
-This is the part I'd want if I only got to keep one feature.
+## The command log saves the receipts
 
-A small Python agent runs on each operator's Kali box. It's standard library
-only, no pip install on a competition machine. A shell hook catches whitelisted
-commands as they're typed and ships them with the operator name, hostname,
-working directory, start time, exit code, and duration. A long scan shows up the
-moment it starts and fills in its result when it finishes.
+This is the feature I would want most during CPTC.
+
+A small Python agent runs on each operator's box. It uses the standard library, so there is no pile of dependencies to install on a competition machine. A shell hook records approved tools as they run and sends BTCT the operator name, host, working directory, command, start time, exit code, and duration.
 
 ![The command log showing captured commands from three operators](/assets/img/posts/btct/command-log.png)
 
-Secrets get redacted before they leave the operator's box. Passwords, hashes,
-auth headers and URL credentials become `«REDACTED»`, and the redaction is
-tool-aware, so `nmap -p 1-65535` keeps its ports while `mysql -pSECRET` gets
-scrubbed. The unredacted line stays in a local log on that machine.
+The goal is not surveillance. It is evidence. When someone says, "I got a shell on SQL," the command, timing, and target can already be in the shared log. The report team can filter by operator, host, tool, status, or text, then export the result as CSV or JSON for an appendix.
 
-New commands push in live. No reload, no polling. In the clip the log fills in
-front of you as three operators' boxes ship `evil-winrm`, `nxc`,
-`impacket-secretsdump` and `sqlmap`, two of them showing `«REDACTED»`, and the
-tool filter chips grow to match. Filter by operator, tool, host, status or free
-text, then export whatever you've filtered to as CSV or JSON for the report
-appendix.
+Secrets are redacted before they leave the operator's machine. Passwords, hashes, auth headers, and URL credentials become `[REDACTED]`. The original command stays in a local log on that operator's box.
 
-Only whitelisted tools are logged. Everything else you type never leaves the box.
+For a collegiate penetration testing competition, this cuts down on the worst kind of end-of-day work: asking every teammate to remember what they ran, where they ran it, and whether it mattered.
 
-## The report is typeset locally
+## The report stays local
 
-There's a Typst tab: source on the left, the rendered document in the middle,
-assets on the right.
+BTCT includes a Typst tab with source on the left, a rendered preview in the middle, and assets on the right.
 
 ![The Typst editor with a live-rendered report preview](/assets/img/posts/btct/typst-report.png)
 
-The compiler and the renderer are WebAssembly, bundled into the app, with the
-default font set embedded. It renders with no network at all. That was the whole
-point. Competition networks are hostile and air-gapped segments are normal, so a
-report tool that phones home to typst.app is a report tool you can't use. Export
-goes to PDF or SVG.
+The compiler and renderer run in WebAssembly inside the app. The default fonts are bundled. That means the report can render without sending content to an outside service, which matters on a competition network where internet access may be limited or where the engagement data should stay on the LAN.
 
-Screenshots don't get pasted wherever your cursor happens to be. You assign them
-to a declared figure slot, which renders as a grey captioned box until something
-fills it. An unfinished figure is then visibly unfinished in the PDF instead of
-quietly missing, and the caption and figure numbering stay put no matter who
-fills it in later. Click anywhere in the rendered preview and the editor jumps to
-the matching source line.
+Screenshots can be assigned to figure slots instead of pasted wherever the cursor happens to be. Empty figures stay visible as placeholders, so missing evidence is obvious before submission. Click in the rendered preview and the editor jumps back to the matching source line.
 
-## Split panes
+## Split panes keep people oriented
 
-Drag any tab to a pane edge. Pages, graphs, findings, the timeline, the Typst
-editor, the assistant, all of them.
+Tabs can be dragged into split panes. Notes, graphs, findings, timeline, command log, Typst, and the assistant can sit next to each other.
 
 ![The graph and a notes page side by side in split panes](/assets/img/posts/btct/split-panes.png)
 
-Attack path on the left, write-up on the right, which is how I actually used it.
+That is not a flashy feature. It is a practical one. Put the attack graph on the left and the write-up on the right. Keep the nmap host open beside the finding. Review the command log while filling in evidence. Fewer window hops means fewer chances to lose your place.
 
-## Everything is live, and there's no database
+## Live sync without a traditional database
 
-There isn't a traditional database anywhere in this. Every record lives in a Yjs
-CRDT document, synced over WebSockets and cached in IndexedDB.
+Under the hood, BTCT uses Yjs, a CRDT library, to sync the workspace over WebSockets. A CRDT is a data structure built for collaborative editing. It lets multiple people change the same shared document and merge those changes without one person's save wiping out someone else's work.
 
-Entity records sit in a `Y.Map` per table, keyed by id. Every collaborative text
-field is backed by a `Y.Text`, so page titles, node labels, scan names and
-hostnames merge character by character instead of one person's save clobbering
-another's. Page bodies get their own per-page document, bound to the editor with
-remote cursors and name tags.
+Records live in shared maps, and collaborative text fields use shared text objects. Page bodies have their own documents, which lets the editor show remote cursors and name tags. IndexedDB caches the workspace locally, so the interface can load quickly and catch up when the connection comes back.
 
-Presence rides along with it, so you can follow a teammate and have your view
-mirror theirs as they move around. And because IndexedDB caches everything
-locally, the UI renders immediately on load and reconciles when the connection
-comes back, which is a nicer property than it sounds like on a flaky competition
-VLAN.
+The high-level version is simpler: everyone is looking at the same workspace, even when the work is split across notes, graphs, scans, findings, commands, and the report.
 
 ## Command palette
 
-`Ctrl/⌘+K` for everything. Create a page or a narrative, open the Typst document,
-jump to any page or graph by name, ask Claude, flip dark mode.
+`Ctrl/Command+K` opens the command palette. From there, you can create a page or graph, open the Typst report, jump to a scan, search the workspace, ask the assistant, or switch themes.
 
 ![The command palette](/assets/img/posts/btct/command-palette.png)
 
-## Claude, in both directions
+This is there for speed. During a competition, navigation should not become another task.
 
-An admin sets an Anthropic API key in the admin panel. The key is stored
-server-side and never reaches the browser or the JS bundle.
+## Claude and MCP
+
+The admin panel can store an Anthropic API key on the server. The key does not go into the browser bundle.
 
 ![Admin panel showing the Claude AI, MCP server, and command log settings](/assets/img/posts/btct/admin-ai-mcp.png)
 
-The built-in assistant is a tab like any other. It reads the live workspace,
-pages, graphs, findings, nmap results, and in edit mode it can write back:
-create a narrative, spawn host and service and credential and finding nodes,
-connect them, add findings, turn a scanned nmap host into a graph node. Its tools
-run in-process against the shared CRDT, so anything it does appears on everyone
-else's canvas immediately and lands in the change log with everything else. There
-are no delete tools, on purpose.
+The in-app assistant can read the current workspace and, when allowed, write back to it. It can create pages, graph nodes, findings, and links using the same shared data model as the rest of the app. There are no delete tools exposed to the assistant.
 
-The other direction is an MCP server at `POST /mcp`, so an external client like
-the Claude Code CLI can read and optionally write the whole workspace. It reuses
-the same tool catalog as the in-app assistant, which means the two can't drift
-apart. Auth is a bearer token the admin generates.
+BTCT also exposes an MCP endpoint at `POST /mcp`, so an outside client like Claude Code can inspect the same workspace through a bearer token.
 
 ```bash
 claude mcp add btct --transport http http://<host>:8080/mcp \
   --header "Authorization: Bearer <token>"
 ```
 
+The point is not to make AI the center of the workflow. The point is to let it help with the repetitive parts, like turning a scan host into a graph node or drafting a finding shell, while the team keeps control of the evidence and final wording.
+
 ## Stack
 
-Bun everywhere. React 19, Vite and Tailwind on the client. Milkdown and
-ProseMirror for the editor, React Flow for the graph, CodeMirror for code,
-typst.ts for the report.
+The app uses Bun, React, Vite, Tailwind, Milkdown, ProseMirror, React Flow, CodeMirror, and Typst in the browser.
 
-The server is deliberately dumb. It's `node:http`, `ws` and `bun:sqlite`, and it
-does auth, static hosting and a Yjs relay. It knows nothing about pages or graphs
-or findings, and there are only three places where that's not true: the AI
-assistant, the asset store, and the command log ingest. Keeping it that way is
-the reason the client can work offline at all.
+The server is intentionally small. It handles login, static hosting, the WebSocket relay, assets, AI calls, and command-log ingest. Most of the competition data model lives in the shared Yjs document, which is why the client can stay useful when the network is unreliable.
+
+That shape fits CPTC well: one container, one port, one shared workspace, and a report process that starts while the technical work is still happening.
+
 
