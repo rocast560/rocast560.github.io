@@ -1,175 +1,184 @@
----
+﻿---
 title: "How about we not take our pentesting notes in Microsoft Word"
 date: 2026-08-08 00:00:00 -0400
 categories: [Projects, Security Tooling]
-tags: [pentest, cptc, reporting, crdt, typst, react, claude, mcp]
-description: "Been There, Conquered That: a real-time notes and reporting workspace for a collegiate pentest competition."
+tags: [pentest, cptc, reporting, collaboration, self-hosted]
+description: "Why I built Been There, Conquered That: shared pentest notes, scans, and evidence that a team can run on a small machine on its own network."
 ---
 
-*Been There, Conquered That: a real-time notes and reporting workspace for a
-collegiate pentest competition.*
-
-<video class="embed-video file" controls muted loop width="960" style="max-width:100%;height:auto">
-  <source src="/assets/img/posts/btct/btct-demo.mp4" type="video/mp4">
-  Your browser does not support the video tag. Here is a
-  <a href="/assets/img/posts/btct/btct-demo.mp4">link to the video file</a> instead.
-</video>
-
-*Full-quality 1920x1080 clip, one take against a small demo workspace called Fake Company.*
+*Been There, Conquered That: a shared workspace for pentest notes and reporting,
+built to run on a small machine on the team's local network.*
 
 ## Why
 
-All of it went in one Word document. Five of us, same document, all day.
+During collegiate pentest competitions, our team used a shared Word document
+to keep track of our work. It let everyone write in the same place, but as the
+notes grew, it became harder to find a specific command, screenshot, or result.
+Writing the report often meant asking teammates where they'd saved something
+or what a particular note referred to.
 
-To be fair, that mostly works. Word handles five cursors without complaining and
-nothing gets lost. But a few hours things get a little messey and there is alot of back and fourth of where is stuff located and when writing asking the question of who did this and where did you write it down.
+We already use Notion or Obsidian for our own notes, so I wanted a similar way
+to organize our competition work. Separate pages, a sidebar to navigate them,
+and properly formatted code blocks would make it easier to follow what
+everyone was doing.
 
-What actually bothered me is that none of us take notes like that anywhere else.
-We all use Notion or Obsidian for our own stuff, with linked pages, tags, a
-sidebar you can navigate, code blocks that look like code. Then we'd sit down for
-the one weekend of the year that matters and drop straight back to using Word because that's what we have to use.
-
-We did have one purpose-built tool. We ran
+We also used
 [SLORPIN](https://github.com/nationalcptc-teamtools/Cal-Poly-Pomona/tree/master/SLORPIN),
-Cal Poly Pomona's nmap aggregator, which stands for Some Lone Operator Remakes
-Program Intended for Nmap. It's a Go and Gin web app that pulls everyone's scan
-results into one database behind a login, organized into named operations, so you
-can review the team's recon in one place instead of on five separate boxes. That
-part was genuinely useful and it's the reason this project exists at all. But it
-only covers recon, it doesn't sync in real time, and it wasn't something you
-wanted to stare at on hour thirty of a competition.
+Cal Poly Pomona's nmap aggregator, to collect the team's network scans in one
+place. Having those results together was useful, and I wanted a similar place
+for our notes and evidence so we could start writing the report without first
+tracking down everyone's files.
 
-So why not just build the rest of it? Word is fine. It just isn't built
-for this, and there's no rule saying the workflow you use for the
-highest-pressure three days of the year has to be the one you're using for class assignments.
+That's where Been There, Conquered That, or BTCT, came from. It gives the team a
+shared place to work, hosted on the same local network as their machines. One
+person starts it on a small server or spare box, and everyone else opens it in
+a browser.
 
-BTCT is that build. Recon aggregation like SLORPIN had, plus the note-taking, the
-attack narrative, the evidence trail, and the report. All of it in one place, all
-of it live, none of it leaving the LAN. One container, one port, one volume on
-the engagement network.
+It also needed to run on a machine with limited resources and be straightforward
+to set up before a competition. That's why I made the current version lighter:
+the team should be able to share notes over the LAN without maintaining a
+complicated server setup or relying on a cloud service.
 
-## Notes
+## Notes you can find again
 
-The notes view is where the project starts, because that is where CPTC teams lose the most time. During a competition, someone finds a weak password, someone else is still scanning, and another person is already trying to turn that into a report paragraph. If the notes are buried in one long Word document, people spend too much time asking where something was written down.
+Instead of one document that keeps getting longer, BTCT has a tree of pages.
+You can keep an engagement overview at the top, put notes for each host
+underneath it, and give the report draft its own page. Titles, tags, and search
+help when you remember what you found but not where you put it.
 
-BTCT keeps notes as a tree of pages. Each page has a title, slug, tags, and an icon, so the team can split the work by host, service, finding, or report section without making a mess. The editor still feels familiar: type Markdown, use headings and lists, paste commands into code blocks, and keep going.
+The editor is familiar if you've used Markdown. Headings, checklists, tables,
+and code blocks are there, along with a slash menu if you don't remember the
+syntax. Code blocks preserve a command's spacing, which makes it much easier
+for someone else to read and reuse.
 
-![The page editor with an engagement notes document](/assets/img/posts/btct/pages-editor.png)
+![A host note with the team's page tree, observations, and a command block](/assets/img/posts/btct/pages-editor.png)
 
-Type `/` and the editor opens a small block menu for headings, lists, quotes, tables, code, and images.
+*The screenshots in this post use a fictional Fake Company workspace.*
 
-![The slash menu open in the editor](/assets/img/posts/btct/slash-menu.png)
+People can edit the same page together and see each other's cursors. That means
+the person writing up a finding can work from the notes while a teammate adds
+the missing details. Page history gives you a way to review changes and recover
+an earlier version if an edit goes wrong.
 
-Code blocks use CodeMirror, so pasted commands look like commands instead of paragraph text. That sounds small, but it matters when the report team is trying to prove exactly what happened three hours later.
+## Everyone's scans in one place
 
-## The attack path belongs on a graph
+This is the part inspired by SLORPIN. A network scan tells you which machines
+are reachable and what services they're exposing. It's useful to the whole
+team, but only if the results aren't stuck on the laptop that ran it.
 
-A written narrative is useful in the final report. It is not always the best way to think while the attack is still unfolding.
+BTCT imports nmap XML files into scan groups. Open a host and you can see its
+ports, service versions, and extra details from the scan. If someone scans that
+host again in the same group, the results merge into its existing entry.
 
-BTCT gives each workspace one or more attack graphs. A node can be a host, service, credential, pivot, or finding. Each node carries useful data, not decoration. A finding carries the fields the report needs later: severity, CVSS, likelihood, impact, exploit steps, MITRE mapping, evidence, and remediation.
+![An imported nmap host with its open ports and service details](/assets/img/posts/btct/nmap-host.png)
 
-![The attack narrative graph for an internal network engagement](/assets/img/posts/btct/attack-graph.png)
+Now a teammate can check whether a service was already found before spending
+time scanning it again. The report writer can look up the same host without
+asking someone to send over their terminal output.
 
-For CPTC, this helps the team agree on the story faster. If FC-WEB01 leads to FC-SQL01, which exposes a service account, which leads to a domain controller issue, that path is visible. A teammate can open the graph and understand the chain without reading five pages first.
-
-The graph can also highlight a path between two nodes and lay itself out automatically. That makes it easier to clean up the narrative before reporting, especially when the board starts as a rough map built during exploitation.
-
-## Findings come from the work
-
-The findings list is generated from finding nodes across the workspace. It is grouped by severity and sorted by CVSS, so the report writer is not maintaining a second spreadsheet while everyone else is still changing the facts.
-
-![The findings collector grouped by severity](/assets/img/posts/btct/findings.png)
-
-That is the real advantage: the same finding used in the attack graph can feed the report view. When the team edits the remediation or adds better evidence, the update stays attached to the finding instead of living in a separate document that someone has to reconcile later.
-
-The timeline uses the same idea. It orders the workspace by discovery time and shows incoming edges under each item, so the team can turn a messy day of work into a cleaner narrative.
-
-![The attack timeline, grouped by day with edge lineage](/assets/img/posts/btct/timeline.png)
-
-One button copies the timeline as Markdown. It will not write the final report for you, which is a good thing. It gives you a starting outline that already has the order and lineage right.
-
-## Nmap import keeps recon connected
-
-Recon usually starts as files scattered across operator machines. BTCT lets the team drop nmap XML into a scan group, then parses hosts, ports, service versions, OS guesses, and NSE script output.
-
-![A parsed nmap host with its open ports and service versions](/assets/img/posts/btct/nmap-host.png)
-
-Re-importing the same host merges the ports instead of duplicating the machine. A scanned host can also be linked to a host node on the graph. Once that link exists, the open ports and service names stay close to the attack path and the write-up.
-
-The demo uses a small fake environment scan:
-[`fake-environment.xml`](/assets/img/posts/btct/fake-environment.xml). It is an `nmap -sS -sV -sC -O` run over a five-host demo network, with one intentionally down host so the parser has to ignore it.
-
-## The command log saves the receipts
-
-This is the feature I would want most during CPTC.
-
-A small Python agent runs on each operator's box. It uses the standard library, so there is no pile of dependencies to install on a competition machine. A shell hook records approved tools as they run and sends BTCT the operator name, host, working directory, command, start time, exit code, and duration.
-
-![The command log showing captured commands from three operators](/assets/img/posts/btct/command-log.png)
-
-The goal is not surveillance. It is evidence. When someone says, "I got a shell on SQL," the command, timing, and target can already be in the shared log. The report team can filter by operator, host, tool, status, or text, then export the result as CSV or JSON for an appendix.
-
-Secrets are redacted before they leave the operator's machine. Passwords, hashes, auth headers, and URL credentials become `[REDACTED]`. The original command stays in a local log on that operator's box.
-
-For a collegiate penetration testing competition, this cuts down on the worst kind of end-of-day work: asking every teammate to remember what they ran, where they ran it, and whether it mattered.
-
-## The report stays local
-
-BTCT includes a Typst tab with source on the left, a rendered preview in the middle, and assets on the right.
-
-![The Typst editor with a live-rendered report preview](/assets/img/posts/btct/typst-report.png)
-
-The compiler and renderer run in WebAssembly inside the app. The default fonts are bundled. That means the report can render without sending content to an outside service, which matters on a competition network where internet access may be limited or where the engagement data should stay on the LAN.
-
-Screenshots can be assigned to figure slots instead of pasted wherever the cursor happens to be. Empty figures stay visible as placeholders, so missing evidence is obvious before submission. Click in the rendered preview and the editor jumps back to the matching source line.
-
-## Split panes keep people oriented
-
-Tabs can be dragged into split panes. Notes, graphs, findings, timeline, command log, Typst, and the assistant can sit next to each other.
-
-![The graph and a notes page side by side in split panes](/assets/img/posts/btct/split-panes.png)
-
-That is not a flashy feature. It is a practical one. Put the attack graph on the left and the write-up on the right. Keep the nmap host open beside the finding. Review the command log while filling in evidence. Fewer window hops means fewer chances to lose your place.
-
-## Live sync without a traditional database
-
-Under the hood, BTCT uses Yjs, a CRDT library, to sync the workspace over WebSockets. A CRDT is a data structure built for collaborative editing. It lets multiple people change the same shared document and merge those changes without one person's save wiping out someone else's work.
-
-Records live in shared maps, and collaborative text fields use shared text objects. Page bodies have their own documents, which lets the editor show remote cursors and name tags. IndexedDB caches the workspace locally, so the interface can load quickly and catch up when the connection comes back.
-
-The high-level version is simpler: everyone is looking at the same workspace, even when the work is split across notes, graphs, scans, findings, commands, and the report.
-
-## Command palette
-
-`Ctrl/Command+K` opens the command palette. From there, you can create a page or graph, open the Typst report, jump to a scan, search the workspace, ask the assistant, or switch themes.
-
-![The command palette](/assets/img/posts/btct/command-palette.png)
-
-This is there for speed. During a competition, navigation should not become another task.
-
-## Claude and MCP
-
-The admin panel can store an Anthropic API key on the server. The key does not go into the browser bundle.
-
-![Admin panel showing the Claude AI, MCP server, and command log settings](/assets/img/posts/btct/admin-ai-mcp.png)
-
-The in-app assistant can read the current workspace and, when allowed, write back to it. It can create pages, graph nodes, findings, and links using the same shared data model as the rest of the app. There are no delete tools exposed to the assistant.
-
-BTCT also exposes an MCP endpoint at `POST /mcp`, so an outside client like Claude Code can inspect the same workspace through a bearer token.
-
-```bash
-claude mcp add btct --transport http http://<host>:8080/mcp \
-  --header "Authorization: Bearer <token>"
-```
-
-The point is not to make AI the center of the workflow. The point is to let it help with the repetitive parts, like turning a scan host into a graph node or drafting a finding shell, while the team keeps control of the evidence and final wording.
-
-## Stack
-
-The app uses Bun, React, Vite, Tailwind, Milkdown, ProseMirror, React Flow, CodeMirror, and Typst in the browser.
-
-The server is intentionally small. It handles login, static hosting, the WebSocket relay, assets, AI calls, and command-log ingest. Most of the competition data model lives in the shared Yjs document, which is why the client can stay useful when the network is unreliable.
-
-That shape fits CPTC well: one container, one port, one shared workspace, and a report process that starts while the technical work is still happening.
-
-
+## Keep the screenshots with the notes
+
+A screenshot is much more useful when you know what it proves. Paste one into
+a note and BTCT adds it to the shared asset library too. The team can organize
+images into folders, crop them to the relevant area, and blur details before
+using them in the report.
+
+![Cropping a shared demo screenshot and blurring a selected field in the image editor](/assets/img/posts/btct/assets-library.png)
+
+Those edits are reusable. If the same image appears in a note and the report,
+you don't have to prepare two separate copies. BTCT keeps the original so the
+crop or blur can be adjusted later; the library itself isn't a place to hide
+information from your teammates.
+
+I want to be able to open a finding's notes and see the explanation beside the
+evidence. A folder full of unnamed screenshots doesn't give the next person
+much to work with.
+
+## What did we actually run?
+
+By the time you're writing the report, the exact command that worked can be
+surprisingly hard to remember. It might be in someone's shell history, or it
+might be three terminal windows back on a machine they aren't using anymore.
+
+BTCT has a shared command log for this. A small agent on each operator's machine
+records configured tools as they're used, along with who ran them, when they
+ran, and their exit status. It saves the command line, not the terminal output.
+The team can filter the log by operator, host, or tool, then export the relevant
+entries for the write-up. There's also a manual entry option for work the agent
+didn't capture.
+
+![The shared command log showing three commands from two operators](/assets/img/posts/btct/command-log.png)
+
+The agent attempts to redact recognized passwords, hashes, and other secrets
+before sending a command. That doesn't cover every possible command format,
+and manually entered commands aren't automatically redacted.
+
+The log won't explain why a command mattered. That's still a note someone needs
+to write. It does save the team from having to reconstruct the command and its
+timing from memory.
+
+## Write the report beside the work
+
+The optional report editor keeps the draft in the same workspace as the notes
+and screenshots. It uses Typst, a text-based document tool: you write the source
+on one side and see the formatted pages on the other. Teammates can work on the
+report together, just as they can with notes.
+
+![The report source beside its rendered preview and evidence assets](/assets/img/posts/btct/typst-report.png)
+
+Screenshots from the shared library can fill figure slots in the report, and
+empty slots make missing evidence easy to spot. Split panes also let you keep a
+host's notes or scan results next to the section you're writing.
+
+Typst does take some learning if you're used to Word. I kept it optional so a
+team can use BTCT for notes and evidence without adopting another writing tool.
+When it's enabled, the preview and browser PDF export use files served by the
+local app. The draft doesn't need to go to an outside rendering service.
+
+## Why I made it smaller
+
+Earlier versions had an attack graph, a separate findings view, a timeline,
+and an AI assistant. I cut those from the current app. They added code and
+screens to maintain, while the reason I started building this was much simpler:
+keep the team's work organized and make it easier to write up.
+
+The target is a LAN host with roughly 1 to 2 GB of RAM and one or two CPU cores.
+That's a design target, not a promise that every report or workspace will use
+the same amount of memory. The browsers have work to do too, especially when
+editing large pages or rendering reports.
+
+So the interface is simpler now. Heavy editors and image tools load when
+opened, closed notes release their live connections after saving locally, and
+the report tools stay unloaded unless they're used. There are fewer decorative
+effects running while someone is just trying to read a page.
+
+## The stack, and why it's there
+
+The client uses React and TypeScript, built with Vite and styled with Tailwind.
+I kept the existing editor and collaboration pieces while trimming what the
+app loads up front. Milkdown and ProseMirror provide the note editor; CodeMirror
+handles code blocks. Those give the team familiar editing behavior without
+having to build a text editor from scratch.
+
+Yjs handles live collaboration over WebSockets, so concurrent edits can merge
+without one person's save replacing another's. IndexedDB keeps a local browser
+cache, which helps notes recover after a dropped connection. That cache is
+useful on an unreliable network, but the shared server still needs backups.
+
+The server runs on Bun and handles login, file serving, uploads, and the shared
+connections. SQLite stores things like accounts and the command archive, while
+LevelDB persists the collaborative documents. Neither needs a separate database
+server to administer. The live command feed only syncs a recent window of
+entries; older commands remain in the archive instead of making every browser
+carry the full history.
+
+Typst's browser compiler uses WebAssembly and loads with the optional report
+editor. Its default fonts are bundled locally. This keeps normal report
+preview work off the small host, though the operator's browser needs the memory
+to compile the document. Additional Word and server PDF export options use the
+host's resources when available.
+
+Docker packages the server and built client together, with persistent data on
+a volume. The team has one service to start on the LAN and one address to open
+in a browser. That's about as much setup as I want before we can start taking
+notes.
